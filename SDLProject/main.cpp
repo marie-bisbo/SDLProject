@@ -4,35 +4,38 @@
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
 
+bool Init();
+bool LoadMedia();
+void Close();
+
+SDL_Window* g_Window = NULL;
+SDL_Surface* g_ScreenSurface = NULL;
+SDL_Surface* g_SurfaceImage = NULL;
+
 int main(int argc, char* args[])
 {
-	SDL_Window* window = NULL;
-	SDL_Surface* screenSurface = NULL;
-
-	if (SDL_Init(SDL_INIT_VIDEO) < 0)
+	if (!Init())
 	{
-		printf("SDL could not initialise! SDL_Error: %s", SDL_GetError());
+		printf("Failed to initialise!\n");
 	}
 	else
 	{
-		window = SDL_CreateWindow("An SDL window", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
-
-		if (window == NULL)
+		if (!LoadMedia())
 		{
-			printf("Window could not be created! SDL_Error: %s", SDL_GetError());
+			printf("Failed to load media!\n");
 		}
 		else
 		{
-			screenSurface = SDL_GetWindowSurface(window);
-			SDL_FillRect(screenSurface, NULL, SDL_MapRGB(screenSurface->format, 0xFF, 0xFF, 0xFF));
-			SDL_UpdateWindowSurface(window);
+			SDL_BlitSurface(g_SurfaceImage, NULL, g_ScreenSurface, NULL);
+			SDL_UpdateWindowSurface(g_Window);
+
 			SDL_Event e;
 			bool quit = false;
 			while (!quit)
 			{
 				while (SDL_PollEvent(&e))
 				{
-					if ((e.type == SDL_QUIT))
+					if (e.type == SDL_QUIT)
 					{
 						quit = true;
 					}
@@ -41,8 +44,59 @@ int main(int argc, char* args[])
 		}
 	}
 
-	SDL_DestroyWindow(window);
-	SDL_Quit();
+	Close();
 
 	return 0;
+}
+
+bool Init()
+{
+	bool bSuccess = true;
+
+	if (SDL_Init(SDL_INIT_VIDEO) < 0)
+	{
+		printf("SDL could not initialise! SDL_Error: %s", SDL_GetError());
+		bSuccess = false;
+	}
+	else
+	{
+		g_Window = SDL_CreateWindow("An SDL window", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+
+		if (g_Window == NULL)
+		{
+			printf("Window could not be created! SDL_Error: %s", SDL_GetError());
+			bSuccess = false;
+		}
+		else
+		{
+			g_ScreenSurface = SDL_GetWindowSurface(g_Window);
+		}
+	}
+
+	return bSuccess;
+}
+
+bool LoadMedia()
+{
+	bool bSuccess = true;
+
+	g_SurfaceImage = SDL_LoadBMP("C:/Personal/SDLProject/Media/a_window.bmp");
+	if (g_SurfaceImage == NULL)
+	{
+		printf("Unable to load image: %s\n", SDL_GetError());
+		bSuccess = false;
+	}
+
+	return bSuccess;
+}
+
+void Close()
+{
+	SDL_FreeSurface(g_SurfaceImage);
+	g_SurfaceImage = NULL;
+
+	SDL_DestroyWindow(g_Window);
+	g_Window = NULL;
+
+	SDL_Quit();
 }
