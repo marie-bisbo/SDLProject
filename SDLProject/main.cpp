@@ -26,20 +26,19 @@ int main(int argc, char* args[])
 		}
 		else
 		{
-			SDL_BlitSurface(g_SurfaceImage, NULL, g_ScreenSurface, NULL);
-			SDL_UpdateWindowSurface(g_Window);
-
-			SDL_Event e;
+			SDL_Event event;
 			bool quit = false;
 			while (!quit)
 			{
-				while (SDL_PollEvent(&e))
+				while (SDL_PollEvent(&event) != 0)
 				{
-					if (e.type == SDL_QUIT)
+					if (event.type == SDL_QUIT)
 					{
 						quit = true;
 					}
 				}
+				SDL_BlitSurface(g_SurfaceImage, NULL, g_ScreenSurface, NULL);
+				SDL_UpdateWindowSurface(g_Window);
 			}
 		}
 	}
